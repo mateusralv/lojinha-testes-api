@@ -1,5 +1,7 @@
 package modulos.produto;
 
+import dataFactory.ProdutodataFactory;
+import dataFactory.UsuarioDataFactory;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -27,14 +29,10 @@ public class ProdutoTest {
         baseURI = "http://165.227.93.41";
         basePath = "/lojinha";
 
-        UsuarioPojo usuario = new UsuarioPojo();
-        usuario.setUsuarioLogin("admin");
-        usuario.setUsuarioSenha("admin");
-
         //Obter o token do usuario
         this.token = given()
                 .contentType(ContentType.JSON)
-                .body(usuario)
+                .body(UsuarioDataFactory.criarUsuarioAdm())
             .when()
                 .post("/v2/login")
             .then()
@@ -43,72 +41,60 @@ public class ProdutoTest {
         System.out.println(token);
     }
 
-    //Inserir um produto com valor 00
-    //Inserir um produto com valor 00
     @Test
-    @DisplayName("Validar os limites proibidos do valor do produto")
+    @DisplayName("Validar limite inferior do valor do produto")
     public void testValidarprecoZero() {
-
-        ProdutoPojo produto = new ProdutoPojo();
-        produto.setProdutoNome("playstationss");
-        produto.setProdutoValor(0.00);
-        List<String> cores = new ArrayList<>();
-        cores.add("preto");
-        cores.add("branco");
-
-        produto.setProdutoCores(cores);
-        produto.setProdutoUrlMock("");
-
-        List<ComponentePojo> componentes = new ArrayList<>();
-
-        ComponentePojo componente = new ComponentePojo();
-        componente.setComponenteNome("Controle");
-        componente.setComponenteQuantidade(1);
-        componentes.add(componente);
-
-        produto.setComponentes(componentes);
-
         given()
                 .contentType(ContentType.JSON)
                 .header("token", this.token)
-                .body(produto)
-                .when()
+                .body(ProdutodataFactory.criarProdutoComumIgualaoValorA(0.00))
+        .when()
                     .post("/v2/produtos")
-                .then()
+        .then()
                     .assertThat()
                         .body("error", equalTo("O valor do produto deve estar entre R$ 0,01 e R$ 7.000,00"))
                         .statusCode(422);
     }
 
     @Test
-    @DisplayName("Validar os limites proibidos do valor do produto")
-    public void testValidarPrecoacima() {
+    @DisplayName("Validar limite superior do valor do produto")
+    public void testValidarPrecoAcima() {
         given()
                 .contentType(ContentType.JSON)
                 .header("token", this.token)
-                .body("{\n" +
-                        "  \"produtoNome\": \"ps5\",\n" +
-                        "  \"produtoValor\": 70001,\n" +
-                        "  \"produtoCores\": [\n" +
-                        "    \"preto\", \"Branco\"\n" +
-                        "  ],\n" +
-                        "  \"produtoUrlMock\": \"string\",\n" +
-                        "  \"componentes\": [\n" +
-                        "    {\n" +
-                        "      \"componenteNome\": \"Controle\",\n" +
-                        "      \"componenteQuantidade\": 2\n" +
-                        "    },\n" +
-                        "    {\n" +
-                        "      \"componenteNome\": \"Jogo\",\n" +
-                        "      \"componenteQuantidade\": 1\n" +
-                        "    }\n" +
-                        "  ]\n" +
-                        "}")
-                .when()
+                .body(ProdutodataFactory.criarProdutoComumIgualaoValorA(7001.00))
+        .when()
                     .post("/v2/produtos")
-                .then()
+        .then()
                     .assertThat()
                         .body("error", equalTo("O valor do produto deve estar entre R$ 0,01 e R$ 7.000,00"))
                         .statusCode(422);
+    }
+
+    @Test
+    @DisplayName("Delete um usuario")
+    public void testDeleteUsuario() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("token", this.token)
+        .when()
+                    .delete("/v2/dados")
+        .then()
+                    .assertThat()
+                    .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("Retorne todos os produtos de um usuario")
+    public void testRetorneProdutosUsuario() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("token", this.token)
+        .when()
+                .get("/v2/produtos")
+        .then()
+                .extract()
+                .path("data.produtoNome");
+        System.out.println(token);
     }
 }
