@@ -67,7 +67,9 @@ A arquitetura REST propõe que a API exponha os recursos de aplicação em um se
   - [x] Codigo de estados http
   - [x] Documentação da API
 
-Os testes exploratórios foram feitos diretamente no swagger e postman depois de adicionar as coleções no postman para realizar testes de carga. 
+Os testes exploratórios foram feitos diretamente no swagger e postman depois de adicionar as coleções no postman para realizar testes de carga.
+
+<img src="/images/postman.png" height="300"> 
     
 #### 📈Testes relacionados as regras de negócios
 - [x] Executar as regras de negócios
@@ -106,8 +108,6 @@ E preenche com nome e valor abaixo de R$0,01
 Então é exibido um alerta de erro.  
 ```
 
-
-<img src="/  images/MensagemDeErro.png" height="300">
 
 ### 👨‍💻 Automatizar os casos de teste criados
 Foi utilizada as bibliotecas do rest assured e do Junit junto com Selenium Webdriver. O padrão para a documentação utilizado foi o #PageObjects 
